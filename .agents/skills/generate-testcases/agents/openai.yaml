@@ -1,0 +1,4 @@
+interface:
+  display_name: "Generate Testcases"
+  short_description: "Propose and publish reviewed Zephyr testcases"
+  default_prompt: "Use $generate-testcases to propose complete testcases in chat for human review."

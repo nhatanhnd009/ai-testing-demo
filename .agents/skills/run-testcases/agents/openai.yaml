@@ -1,0 +1,4 @@
+interface:
+  display_name: "Run Testcases"
+  short_description: "Run Playwright and summarize Pass or Fail"
+  default_prompt: "Use $run-testcases to execute the selected Playwright layer or HC-T key and summarize results."

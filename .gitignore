@@ -1,0 +1,9 @@
+node_modules/
+.env
+reports/results.json
+reports/summary.json
+reports/playwright-report/
+reports/test-results/
+test-results/
+playwright-report/
+.DS_Store

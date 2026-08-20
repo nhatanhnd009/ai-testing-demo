@@ -1,0 +1,18 @@
+sources:
+  local:
+    enabled: true
+    path: requirements/input
+
+  confluence:
+    enabled: false
+    space_key: ""
+    page_ids: []
+
+  jira:
+    enabled: false
+    project_key: ""
+    issue_keys: []
+
+  zephyr:
+    enabled: false
+    project_key: HC

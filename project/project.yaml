@@ -1,0 +1,17 @@
+project:
+  name: testing
+  type: web-and-api
+  testcase_source: zephyr
+
+test:
+  framework: playwright
+  language: typescript
+  design_pattern: page-object-model
+  browser: chromium
+  test_id_pattern: "^HC-T[0-9]+$"
+
+output:
+  requirement_analysis: requirements/analyzed
+  automation: tests
+  test_data: tests/test-data
+  reports: reports

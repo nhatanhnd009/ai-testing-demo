@@ -1,0 +1,4 @@
+interface:
+  display_name: "Analyze Requirement"
+  short_description: "Analyze a BRD or ticket without inventing rules"
+  default_prompt: "Use $analyze-requirement to analyze this requirement and save the structured result."

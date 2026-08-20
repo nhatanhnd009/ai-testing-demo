@@ -1,0 +1,6 @@
+zephyr:
+  enabled: false
+  project_key: HC
+  features_root: Features
+  e2e_root: End-to-End/Release Full Flows
+  test_key_pattern: "^HC-T[0-9]+$"

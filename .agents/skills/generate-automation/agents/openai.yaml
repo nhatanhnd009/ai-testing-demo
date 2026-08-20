@@ -1,0 +1,4 @@
+interface:
+  display_name: "Generate Automation"
+  short_description: "Create data-driven scripts from finalized Zephyr cases"
+  default_prompt: "Use $generate-automation to create Playwright TypeScript for these finalized Zephyr Keys."
