@@ -1,5 +1,5 @@
 import { execFile } from 'node:child_process';
-import { cp, mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
+import { cp, mkdir, mkdtemp, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { promisify } from 'node:util';
@@ -36,6 +36,7 @@ export function resolvePublishOptions(argv = process.argv.slice(2), env = proces
   const options = {
     branch: env.REPORT_PAGES_BRANCH ?? 'gh-pages',
     reportDir: path.normalize(env.REPORT_DIR ?? 'reports/playwright-report'),
+    resultsPath: path.normalize(env.REPORT_RESULTS ?? 'reports/results.json'),
     summaryPath: path.normalize(env.REPORT_SUMMARY ?? 'reports/summary.json'),
     commitMessage: env.REPORT_COMMIT_MESSAGE ?? 'Publish Playwright report',
     dryRun: false,
@@ -52,6 +53,9 @@ export function resolvePublishOptions(argv = process.argv.slice(2), env = proces
       index += 1;
     } else if (arg === '--report-dir' && next) {
       options.reportDir = path.normalize(next);
+      index += 1;
+    } else if (arg === '--results' && next) {
+      options.resultsPath = path.normalize(next);
       index += 1;
     } else if (arg === '--summary' && next) {
       options.summaryPath = path.normalize(next);
@@ -87,7 +91,7 @@ export function resolveGitAuthorEnv(env = process.env) {
   };
 }
 
-export async function assertReportReady(reportDir, summaryPath) {
+export async function assertReportReady(reportDir, summaryPath, resultsPath) {
   try {
     await readFile(path.join(reportDir, 'index.html'), 'utf8');
     await readFile(summaryPath, 'utf8');
@@ -96,6 +100,16 @@ export async function assertReportReady(reportDir, summaryPath) {
       throw new Error('Run Playwright and npm run summarize before publishing the report');
     }
     throw error;
+  }
+
+  if (resultsPath) {
+    const [resultsInfo, summaryInfo] = await Promise.all([
+      stat(resultsPath),
+      stat(summaryPath),
+    ]);
+    if (summaryInfo.mtimeMs < resultsInfo.mtimeMs) {
+      throw new Error('reports/summary.json is older than reports/results.json; run npm run summarize before publishing');
+    }
   }
 }
 
@@ -200,7 +214,7 @@ export async function publishReport(options = resolvePublishOptions(), dependenc
   const makeTempDir = dependencies.makeTempDir ?? mkdtemp;
   const authorEnv = dependencies.authorEnv ?? resolveGitAuthorEnv();
 
-  await assertReportReady(options.reportDir, options.summaryPath);
+  await assertReportReady(options.reportDir, options.summaryPath, options.resultsPath);
   const remoteUrl = await run(['config', '--get', 'remote.origin.url']);
   const repository = parseGitHubRemote(remoteUrl);
   const publicUrl = buildPagesUrl(repository);

@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, mkdir, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, utimes, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
@@ -76,6 +76,7 @@ test('resolves default publish options', () => {
   assert.deepEqual(resolvePublishOptions([], {}), {
     branch: 'gh-pages',
     reportDir: path.normalize('reports/playwright-report'),
+    resultsPath: path.normalize('reports/results.json'),
     summaryPath: path.normalize('reports/summary.json'),
     commitMessage: 'Publish Playwright report',
     dryRun: false,
@@ -98,13 +99,37 @@ test('requires the generated HTML report and summary before publishing', async (
   );
 });
 
-test('publishes generated report assets to a gh-pages worktree', async () => {
+test('rejects a stale summary that is older than Playwright results', async () => {
   const root = await mkdtemp(path.join(tmpdir(), 'publish-report-pages-'));
   const reportDir = path.join(root, 'reports/playwright-report');
+  const resultsPath = path.join(root, 'reports/results.json');
   const summaryPath = path.join(root, 'reports/summary.json');
   await mkdir(reportDir, { recursive: true });
   await mkdir(path.dirname(summaryPath), { recursive: true });
   await writeFile(path.join(reportDir, 'index.html'), '<!doctype html>\n');
+  await writeFile(resultsPath, '{"stats":{"expected":4}}\n');
+  await writeFile(summaryPath, '{"skipped":4}\n');
+
+  const oldTime = new Date('2026-08-21T01:00:00Z');
+  const newTime = new Date('2026-08-21T02:00:00Z');
+  await utimes(summaryPath, oldTime, oldTime);
+  await utimes(resultsPath, newTime, newTime);
+
+  await assert.rejects(
+    () => assertReportReady(reportDir, summaryPath, resultsPath),
+    /npm run summarize/,
+  );
+});
+
+test('publishes generated report assets to a gh-pages worktree', async () => {
+  const root = await mkdtemp(path.join(tmpdir(), 'publish-report-pages-'));
+  const reportDir = path.join(root, 'reports/playwright-report');
+  const summaryPath = path.join(root, 'reports/summary.json');
+  const resultsPath = path.join(root, 'reports/results.json');
+  await mkdir(reportDir, { recursive: true });
+  await mkdir(path.dirname(summaryPath), { recursive: true });
+  await writeFile(path.join(reportDir, 'index.html'), '<!doctype html>\n');
+  await writeFile(resultsPath, '{"stats":{"expected":1}}\n');
   await writeFile(summaryPath, '{"total":1}\n');
 
   const calls = [];
@@ -115,6 +140,8 @@ test('publishes generated report assets to a gh-pages worktree', async () => {
       'gh-pages',
       '--report-dir',
       reportDir,
+      '--results',
+      resultsPath,
       '--summary',
       summaryPath,
     ]),

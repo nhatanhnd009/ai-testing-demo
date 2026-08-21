@@ -18,8 +18,8 @@
     "test:id": "node scripts/run-by-id.mjs",
     "test:headed": "playwright test --headed",
     "report": "playwright show-report reports/playwright-report",
-    "report:publish": "node scripts/publish-report-pages.mjs",
-    "report:publish:dry": "node scripts/publish-report-pages.mjs --dry-run",
+    "report:publish": "npm run summarize && node scripts/publish-report-pages.mjs",
+    "report:publish:dry": "npm run summarize && node scripts/publish-report-pages.mjs --dry-run",
     "summarize": "node scripts/summarize-results.mjs",
     "verify": "npm run check:config && npm run check:skills && npm run check:mapping && npm run test:unit && npm run typecheck && npm run test:list"
   },
