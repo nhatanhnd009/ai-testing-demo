@@ -1,0 +1,27 @@
+TestcaseID,Description,Preconditions,Steps,Expected
+HC-001,Login successfully and start shopping,"Application is available; valid credential profile exists; product listing contains at least one product","1. Open the login page using LOGIN_URL
+2. Enter valid credentials using standardUser
+3. Submit the login form
+4. Add one product from the product listing
+5. Inspect the added product button","1. Login page is displayed
+2. Username and password are entered
+3. Home page is displayed
+4. The product is added
+5. The button displays Remove"
+HC-002,Reject invalid credentials,"Application is available; an invalid credential dataset exists","1. Open the login page using LOGIN_URL
+2. Enter invalid credentials from the invalid credential dataset
+3. Submit the login form
+4. Inspect navigation after rejection","1. Login page is displayed
+2. Username and password are entered
+3. Error message is displayed: Epic sadface: Username and password do not match any user in this service
+4. Home page is not displayed"
+HC-003,Add only one unit of a product from the listing,"User is logged in; product listing contains at least one product that has not been added","1. Open the product listing
+2. Add one displayed product
+3. Inspect the same product button
+4. Check whether the same product can be added again from the listing","1. Product listing is displayed
+2. The product is added
+3. The button displays Remove
+4. No add control is available for a second unit"
+HC-004,Remove one product from the listing,"User is logged in; one product has been added and displays a Remove button","1. Open the product listing
+2. Select Remove for the added product","1. The added product displays a Remove button
+2. The product is removed from the added state"

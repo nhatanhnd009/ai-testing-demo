@@ -1,0 +1,10 @@
+{
+  "HC-002": {
+    "credentials": {
+      "username": "invalid_user",
+      "password": "invalid_password"
+    },
+    "expectedError": "Epic sadface: Username and password do not match any user in this service",
+    "expectedProductTitleCount": 0
+  }
+}

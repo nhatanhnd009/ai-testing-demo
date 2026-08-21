@@ -1,23 +1,33 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { summarizePlaywrightReport } from './summarize-results.mjs';
+import {
+  resolveReportTarget,
+  summarizePlaywrightReport,
+} from './summarize-results.mjs';
 
-test('maps every Playwright result to its Zephyr key', () => {
+test('uses the configured UI URL as the report target', () => {
+  assert.equal(
+    resolveReportTarget({ BASE_URL: 'https://app.example.test/' }),
+    'https://app.example.test/',
+  );
+});
+
+test('maps every Playwright result to its Local Demo key', () => {
   const report = {
     suites: [
       {
         specs: [
           {
-            title: 'HC-T123 | Login successfully',
+            title: 'HC-001 | Login successfully',
             tests: [{ results: [{ status: 'passed' }] }],
           },
           {
-            title: 'HC-T124 | Reject invalid login',
+            title: 'HC-002 | Reject invalid login',
             tests: [{ results: [{ status: 'failed' }] }],
           },
           {
-            title: 'HC-T125 | Future case',
+            title: 'HC-003 | Future case',
             tests: [{ results: [{ status: 'skipped' }] }],
           },
         ],
@@ -30,16 +40,16 @@ test('maps every Playwright result to its Zephyr key', () => {
     passed: 1,
     failed: 1,
     skipped: 1,
-    failedTestIds: ['HC-T124'],
+    failedTestIds: ['HC-002'],
     testcases: [
-      { testId: 'HC-T123', title: 'Login successfully', status: 'passed' },
-      { testId: 'HC-T124', title: 'Reject invalid login', status: 'failed' },
-      { testId: 'HC-T125', title: 'Future case', status: 'skipped' },
+      { testId: 'HC-001', title: 'Login successfully', status: 'passed' },
+      { testId: 'HC-002', title: 'Reject invalid login', status: 'failed' },
+      { testId: 'HC-003', title: 'Future case', status: 'skipped' },
     ],
   });
 });
 
-test('rejects a Playwright result without an HC-T key', () => {
+test('rejects a Playwright result without a Local Demo key', () => {
   const report = {
     suites: [
       {
@@ -55,7 +65,7 @@ test('rejects a Playwright result without an HC-T key', () => {
 
   assert.throws(
     () => summarizePlaywrightReport(report),
-    /missing HC-T Test ID/,
+    /missing Local Demo Test ID/,
   );
 });
 

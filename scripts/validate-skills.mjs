@@ -14,15 +14,15 @@ const contracts = {
     'explicit human instruction',
     'Test Layer',
     'Expected Result',
-    'HC-T',
+    'HC-001',
     'Never create automation',
   ],
   'generate-automation': [
-    'finalized Zephyr Keys',
+    'configured source',
     'reread',
-    'HC-T',
+    'HC-001',
     '*.spec.ts',
-    '*.testdata.json',
+    '*.json',
     'tests/api-clients',
     'tests/pages',
     'getByTestId',
@@ -34,7 +34,7 @@ const contracts = {
     'npm run test:integration',
     'npm run test:e2e',
     'reports/results.json',
-    'HC-T',
+    'HC-001',
   ],
 };
 

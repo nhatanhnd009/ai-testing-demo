@@ -4,8 +4,91 @@ import { readdir, readFile } from 'node:fs/promises';
 import ts from 'typescript';
 
 const LAYERS = ['api', 'ui', 'integration', 'end-to-end'];
-const TEST_TITLE = /^(HC-T\d+)\s+\|\s+.+$/;
+const TEST_TITLE = /^(HC-\d{3,})\s+\|\s+(.+)$/;
 const ANY_TEST_TITLE = /\btest\s*\(\s*(['"])([^'"]+)\1/g;
+
+function parseCsv(source) {
+  const rows = [];
+  let row = [];
+  let field = '';
+  let quoted = false;
+
+  for (let index = 0; index < source.length; index += 1) {
+    const character = source[index];
+    if (character === '"') {
+      if (quoted && source[index + 1] === '"') {
+        field += '"';
+        index += 1;
+      } else {
+        quoted = !quoted;
+      }
+    } else if (character === ',' && !quoted) {
+      row.push(field);
+      field = '';
+    } else if ((character === '\n' || character === '\r') && !quoted) {
+      if (character === '\r' && source[index + 1] === '\n') index += 1;
+      row.push(field);
+      field = '';
+      if (row.some((value) => value.length > 0)) rows.push(row);
+      row = [];
+    } else {
+      field += character;
+    }
+  }
+
+  if (field.length > 0 || row.length > 0) {
+    row.push(field);
+    rows.push(row);
+  }
+  if (quoted) throw new Error('Local Demo CSV contains an unclosed quote');
+  if (rows.length === 0) return [];
+
+  const [headers, ...dataRows] = rows;
+  return dataRows.map((values) =>
+    Object.fromEntries(headers.map((header, index) => [header, values[index] ?? ''])),
+  );
+}
+
+function normalizeLayer(layer) {
+  return layer.trim().toLowerCase().replaceAll(' ', '-');
+}
+
+export function validateLocalDemoMappings(automationDefinitions, csvRows) {
+  const cases = new Map();
+  for (const row of csvRows) {
+    if (row.Source && row.Source !== 'Local Demo') continue;
+    const id = row.TestcaseID || row['Testcase ID'];
+    if (!/^HC-\d{3,}$/.test(id)) {
+      throw new Error(`Invalid Local Demo testcase ID: ${id}`);
+    }
+    const definition = {
+      layer: row['Test Layer'] ? normalizeLayer(row['Test Layer']) : undefined,
+      title: row.Description || row.Title,
+    };
+    const existing = cases.get(id);
+    if (
+      existing &&
+      ((existing.layer && definition.layer && existing.layer !== definition.layer) ||
+        existing.title !== definition.title)
+    ) {
+      throw new Error(`${id} has inconsistent rows in the Local Demo CSV`);
+    }
+    cases.set(id, definition);
+  }
+
+  for (const automation of automationDefinitions) {
+    const source = cases.get(automation.id);
+    if (!source) {
+      throw new Error(`${automation.id} is missing from the Local Demo CSV`);
+    }
+    if (source.title !== automation.title) {
+      throw new Error(`${automation.id} title does not match the Local Demo CSV`);
+    }
+    if (source.layer && source.layer !== automation.layer) {
+      throw new Error(`${automation.id} layer does not match the Local Demo CSV`);
+    }
+  }
+}
 
 export function deriveTestDataPath(specPath) {
   const normalized = path.normalize(specPath).replaceAll('\\', '/');
@@ -18,10 +101,10 @@ export function deriveTestDataPath(specPath) {
   }
 
   const [, testsRoot, layer, relativePath] = match;
-  return `${testsRoot}/test-data/${layer}/${relativePath}.testdata.json`;
+  return `${testsRoot}/${layer}/${relativePath}.json`;
 }
 
-export function extractZephyrIds(source) {
+export function extractTestcaseIds(source) {
   const titles = [...source.matchAll(ANY_TEST_TITLE)].map((match) => match[2]);
   if (titles.length === 0) {
     throw new Error('Spec must contain at least one test() title');
@@ -30,15 +113,25 @@ export function extractZephyrIds(source) {
   const ids = titles.map((title) => {
     const match = title.match(TEST_TITLE);
     if (!match) {
-      throw new Error(`Playwright title must start with HC-T123 | format: ${title}`);
+      throw new Error(`Playwright title must start with HC-001 | format: ${title}`);
     }
     return match[1];
   });
 
   if (new Set(ids).size !== ids.length) {
-    throw new Error('A Zephyr Test ID may appear only once in a spec');
+    throw new Error('A testcase ID may appear only once in a spec');
   }
   return ids;
+}
+
+function extractTestcaseDefinitions(source, layer) {
+  return [...source.matchAll(ANY_TEST_TITLE)].map((match) => {
+    const titleMatch = match[2].match(TEST_TITLE);
+    if (!titleMatch) {
+      throw new Error(`Playwright title must start with HC-001 | format: ${match[2]}`);
+    }
+    return { id: titleMatch[1], layer, title: titleMatch[2] };
+  });
 }
 
 function assertNoTestcaseLiterals(source, specPath) {
@@ -58,7 +151,7 @@ function assertNoTestcaseLiterals(source, specPath) {
         parent.argumentExpression === node &&
         ts.isIdentifier(parent.expression) &&
         parent.expression.text === 'testData' &&
-        /^HC-T\d+$/.test(node.text);
+        /^HC-\d{3,}$/.test(node.text);
       const isStepLabel =
         ts.isCallExpression(parent) &&
         parent.arguments[0] === node &&
@@ -123,7 +216,7 @@ export async function validateSpecDataPair(
   }
 
   const importMatch = source.match(
-    /import\s+testData\s+from\s+(['"])([^'"]+\.testdata\.json)\1\s*;/,
+    /import\s+testData\s+from\s+(['"])([^'"]+\.json)\1\s*;/,
   );
   const resolvedImport = importMatch
     ? path.resolve(path.dirname(specPath), importMatch[2])
@@ -132,7 +225,7 @@ export async function validateSpecDataPair(
     throw new Error(`${specPath}: Spec must import its matching test-data file`);
   }
 
-  const ids = extractZephyrIds(source);
+  const ids = extractTestcaseIds(source);
   const data = JSON.parse(rawData);
   if (!data || Array.isArray(data) || typeof data !== 'object') {
     throw new Error(`${dataPath}: Test data must be a JSON object`);
@@ -152,8 +245,8 @@ export async function validateSpecDataPair(
   }
 
   for (const id of Object.keys(data)) {
-    if (!/^HC-T\d+$/.test(id)) {
-      throw new Error(`${dataPath}: Invalid Zephyr Test ID: ${id}`);
+    if (!/^HC-\d{3,}$/.test(id)) {
+      throw new Error(`${dataPath}: Invalid testcase ID: ${id}`);
     }
     if (!ids.includes(id)) {
       throw new Error(`${dataPath}: ${id} has no matching test in the spec`);
@@ -186,8 +279,30 @@ async function findSpecs(directory) {
   return specs;
 }
 
-export async function validateAutomationTree(testsRoot = 'tests') {
+async function findCsvFiles(directory) {
+  let entries;
+  try {
+    entries = await readdir(directory, { withFileTypes: true });
+  } catch (error) {
+    if (error?.code === 'ENOENT') return [];
+    throw error;
+  }
+
+  const files = [];
+  for (const entry of entries) {
+    const entryPath = path.join(directory, entry.name);
+    if (entry.isDirectory()) files.push(...(await findCsvFiles(entryPath)));
+    else if (entry.isFile() && entry.name.endsWith('.csv')) files.push(entryPath);
+  }
+  return files;
+}
+
+export async function validateAutomationTree(
+  testsRoot = 'tests',
+  testcaseRoot = 'testcases',
+) {
   const seenIds = new Set();
+  const automationDefinitions = [];
   let specCount = 0;
   let testcaseCount = 0;
 
@@ -199,10 +314,18 @@ export async function validateAutomationTree(testsRoot = 'tests') {
         deriveTestDataPath(specPath),
         seenIds,
       );
+      const source = await readFile(specPath, 'utf8');
+      automationDefinitions.push(...extractTestcaseDefinitions(source, layer));
       specCount += 1;
       testcaseCount += ids.length;
     }
   }
 
-  return { specs: specCount, testcases: testcaseCount };
+  const csvFiles = await findCsvFiles(testcaseRoot);
+  const csvRows = (
+    await Promise.all(csvFiles.map(async (csvPath) => parseCsv(await readFile(csvPath, 'utf8'))))
+  ).flat();
+  validateLocalDemoMappings(automationDefinitions, csvRows);
+
+  return { specs: specCount, testcases: testcaseCount, ids: [...seenIds] };
 }

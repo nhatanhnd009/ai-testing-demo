@@ -1,3 +1,5 @@
+import 'dotenv/config';
+
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
 
@@ -23,9 +25,9 @@ export function summarizePlaywrightReport(report) {
   };
 
   for (const spec of collectSpecs(report.suites)) {
-    const match = spec.title?.match(/^(HC-T\d+)\s*\|\s*(.+)$/);
+    const match = spec.title?.match(/^(HC-\d{3,})\s*\|\s*(.+)$/);
     if (!match) {
-      throw new Error(`Playwright result is missing HC-T Test ID: ${spec.title}`);
+      throw new Error(`Playwright result is missing Local Demo Test ID: ${spec.title}`);
     }
     const [, testId, title] = match;
 
@@ -57,6 +59,10 @@ export function summarizePlaywrightReport(report) {
   return counts;
 }
 
+export function resolveReportTarget(env = process.env) {
+  return env.BASE_URL ?? env.API_BASE_URL ?? 'not-configured';
+}
+
 async function main() {
   const reportPath = process.argv[2] ?? 'reports/results.json';
   const outputPath = process.argv[3] ?? 'reports/summary.json';
@@ -64,7 +70,7 @@ async function main() {
   const counts = summarizePlaywrightReport(JSON.parse(raw));
   const summary = {
     project: 'testing',
-    target: process.env.BASE_URL ?? process.env.API_BASE_URL ?? 'not-configured',
+    target: resolveReportTarget(),
     ...counts,
     generatedAt: new Date().toISOString(),
   };

@@ -7,10 +7,12 @@ type ApiConfig = {
   apiBaseUrl: string;
 };
 
-type CredentialProfile = {
+export type CredentialProfile = {
   username: string;
   password: string;
 };
+
+export type CredentialProfileName = 'standardUser';
 
 function required(env: NodeJS.ProcessEnv, name: string): string {
   const value = env[name]?.trim();
@@ -34,7 +36,7 @@ export function loadApiConfig(env = process.env): ApiConfig {
 }
 
 export function loadCredentialProfile(
-  profile: 'standardUser',
+  profile: CredentialProfileName,
   env = process.env,
 ): CredentialProfile {
   if (profile !== 'standardUser') {

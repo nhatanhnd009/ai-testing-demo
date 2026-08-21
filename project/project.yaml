@@ -1,17 +1,18 @@
 project:
   name: testing
   type: web-and-api
-  testcase_source: zephyr
+  testcase_source: local-demo
 
 test:
   framework: playwright
   language: typescript
   design_pattern: page-object-model
   browser: chromium
-  test_id_pattern: "^HC-T[0-9]+$"
+  test_id_pattern: "^HC-[0-9]{3,}$"
 
 output:
   requirement_analysis: requirements/analyzed
   automation: tests
-  test_data: tests/test-data
+  test_data: colocated
   reports: reports
+  local_testcases: testcases

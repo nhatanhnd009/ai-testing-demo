@@ -42,12 +42,7 @@ testing/
 │   ├── pages/
 │   ├── api-clients/
 │   ├── fixtures/
-│   ├── config/
-│   └── test-data/
-│       ├── api/<feature>/
-│       ├── ui/<feature>/
-│       ├── integration/<feature>/
-│       └── end-to-end/<release-flow>/
+│   └── config/
 ├── reports/
 ├── scripts/
 ├── .env.example
@@ -182,12 +177,12 @@ Locator và reusable UI actions nằm trong `tests/pages/`; spec không chứa r
 
 ## 5. Rule một spec — một JSON test data
 
-Mỗi `*.spec.ts` bắt buộc có đúng một `*.testdata.json` cùng tên và cùng đường dẫn layer/feature:
+Mỗi `*.spec.ts` bắt buộc có đúng một `*.json` cùng tên, nằm ngay cùng folder với spec:
 
 ```text
 tests/integration/authentication/login.spec.ts
 ↔
-tests/test-data/integration/authentication/login.testdata.json
+tests/integration/authentication/login.json
 ```
 
 Test ID dùng thống nhất ở mọi nơi:
@@ -226,7 +221,7 @@ Kiểm tra mapping:
 npm run check:mapping
 ```
 
-Validator từ chối spec thiếu JSON tương ứng, sai đường dẫn/tên file, Test ID không phải `HC-Txxx`, key trùng, JSON key thừa/thiếu hoặc testcase-specific literal bị hardcode trong test callback.
+Validator từ chối spec thiếu JSON tương ứng, sai đường dẫn/tên file, Test ID không đúng format nguồn testcase đang cấu hình, key trùng, JSON key thừa/thiếu hoặc testcase-specific literal bị hardcode trong test callback.
 
 ## 6. Chạy test
 
@@ -235,7 +230,7 @@ npm run test:api
 npm run test:ui
 npm run test:integration
 npm run test:e2e
-npm run test:id -- HC-T123
+npm run test:id -- HC-001
 ```
 
 `test:integration` chạy các case API trước rồi UI trong cùng testcase. `test:e2e` chỉ chạy folder release full flow. Chạy toàn bộ automation bằng:
@@ -260,6 +255,17 @@ Mở HTML report:
 npm run report
 ```
 
+Publish HTML report lên GitHub Pages:
+
+```powershell
+npm test
+npm run summarize
+npm run report:publish:dry
+npm run report:publish
+```
+
+Lần đầu dùng GitHub Pages, vào GitHub repo → Settings → Pages và chọn source là branch `gh-pages` ở root. Script sẽ push report hiện tại lên branch `gh-pages`, tạo trang root redirect về `playwright-report/`, và in ra URL public dạng `https://<owner>.github.io/<repo>/`.
+
 ## 7. GitLab workflow cho automation
 
 Chỉ code automation và JSON test data đi qua branch/Merge Request:
@@ -267,12 +273,12 @@ Chỉ code automation và JSON test data đi qua branch/Merge Request:
 ```powershell
 git switch main
 git pull
-git switch -c automation/HC-T123
+git switch -c automation/HC-001
 
 npm run verify
 git add tests project .agents scripts package.json package-lock.json README.md
-git commit -m "test: automate HC-T123"
-git push -u origin automation/HC-T123
+git commit -m "test: automate HC-001"
+git push -u origin automation/HC-001
 ```
 
 Tạo Merge Request để tester khác review code. Không tạo thêm testcase draft hoặc testcase chính thức trong Git vì phần đó đã được review trên Zephyr.

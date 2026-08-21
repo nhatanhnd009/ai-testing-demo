@@ -19,8 +19,9 @@ test('Playwright discovers all four automation layers', async () => {
   }
 });
 
-test('project configuration declares Zephyr as testcase source', async () => {
+test('project configuration declares Local Demo as testcase source', async () => {
   const config = await readFile('project/project.yaml', 'utf8');
-  assert.match(config, /testcase_source:\s*zephyr/);
+  assert.match(config, /testcase_source:\s*local-demo/);
+  assert.match(config, /test_id_pattern:\s*"\^HC-\[0-9\]\{3,\}\$"/);
   assert.doesNotMatch(config, /testcases\/generated/);
 });

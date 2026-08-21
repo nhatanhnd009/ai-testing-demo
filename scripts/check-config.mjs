@@ -30,18 +30,12 @@ for (const requiredText of [
 }
 
 const projectConfig = await readFile('project/project.yaml', 'utf8');
-if (!projectConfig.includes('testcase_source: zephyr')) {
-  throw new Error('project/project.yaml must declare testcase_source: zephyr');
+if (!projectConfig.includes('testcase_source: local-demo')) {
+  throw new Error('project/project.yaml must declare testcase_source: local-demo');
 }
-if (projectConfig.includes('testcases/generated')) {
-  throw new Error('Git testcase storage is obsolete; Zephyr is the source of truth');
+if (!projectConfig.includes('test_id_pattern: "^HC-[0-9]{3,}$"')) {
+  throw new Error('project/project.yaml must declare the Local Demo key pattern');
 }
-
-try {
-  await access('testcases');
-  throw new Error('The obsolete testcases/ directory must not exist');
-} catch (error) {
-  if (error?.code !== 'ENOENT') throw error;
-}
+await access('testcases');
 
 console.log('Configuration contract is valid.');

@@ -1,22 +1,26 @@
 ---
 name: generate-automation
-description: Use when a human explicitly requests Playwright TypeScript scripts for finalized, cross-reviewed Zephyr Keys in API, UI, integration, or end-to-end scope.
+description: Use when a human explicitly requests Playwright TypeScript scripts for reviewed testcase keys from Zephyr or the configured Local Demo CSV.
 ---
 
 # Generate Automation
 
 ## Goal
 
-Generate discoverable Playwright TypeScript only from the latest finalized Zephyr testcase and keep all testcase-specific data in the matching JSON file.
+Generate discoverable Playwright TypeScript only from the latest reviewed testcase in the configured source and keep all testcase-specific data in the matching JSON file.
 
 ## Required Gate
 
-Require both statements from the human:
+Read `project/project.yaml` and apply the gate for its testcase source.
+
+For Zephyr, require both statements from the human:
 
 1. cross-review in Zephyr is complete;
-2. create scripts for named finalized Zephyr Keys matching `HC-T\d+`.
+2. create scripts for named finalized Zephyr Keys matching the configured Zephyr pattern.
 
 Publishing or editing a testcase does not satisfy this gate. Always reread every requested `HC-Txxx` testcase from Zephyr immediately before generation. Stop if Zephyr is unavailable, a key is missing, Test Layer is `Manual`, or a step is ambiguous.
+
+For Local Demo, require explicit human approval of the proposals and named keys matching `HC-[0-9]{3,}`. Reread each requested key from the reviewed CSV under `testcases/` immediately before generation. Stop if a key is absent, duplicated, marked with a source other than `Local Demo`, has Test Layer `Manual`, or contains an ambiguous step.
 
 ## Layer Selection
 
@@ -33,18 +37,18 @@ Put reusable request behavior in `tests/api-clients`, UI locators/actions in `te
 
 ## Data Contract
 
-Create exactly one `*.testdata.json` for each `*.spec.ts`. Mirror its layer, feature path, and basename under `tests/test-data/`.
+Create exactly one `*.json` for each `*.spec.ts`. Place it in the same directory as the spec and use the same basename.
 
-Use every Zephyr Key consistently:
+Use every testcase key consistently. For example in Local Demo:
 
 ```text
-Zephyr:    HC-T123
-Spec:      HC-T123 | Login successfully
-JSON key:  HC-T123
-Report:    HC-T123
+CSV:       HC-001
+Spec:      HC-001 | Login successfully
+JSON key:  HC-001
+Report:    HC-001
 ```
 
-Load API payloads, UI inputs, and expected values through `testData['HC-T123']`. Do not hardcode testcase-specific values in the test callback. Store only credential profile names in JSON; load real values from `.env` through `tests/config/environment.ts`.
+Load API payloads, UI inputs, and expected values through the matching key, such as `testData['HC-001']`. Do not hardcode testcase-specific values in the test callback. Store only credential profile names in JSON; load real values from `.env` through `tests/config/environment.ts`.
 
 ## API and Browser Workflow
 
@@ -64,4 +68,4 @@ npm run typecheck
 npm run test:list
 ```
 
-Confirm every requested `HC-Txxx` appears in discovery and its matching JSON. Report a blocker rather than creating skipped, placeholder, or false-pass tests.
+Confirm every requested key appears in discovery and its matching JSON. Report a blocker rather than creating skipped, placeholder, or false-pass tests.

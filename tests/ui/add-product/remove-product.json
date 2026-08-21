@@ -1,0 +1,9 @@
+{
+  "HC-004": {
+    "credentialProfile": "standardUser",
+    "productName": "Sauce Labs Backpack",
+    "addButtonName": "Add to cart",
+    "removeButtonName": "Remove",
+    "expectedRemoveButtonCount": 0
+  }
+}

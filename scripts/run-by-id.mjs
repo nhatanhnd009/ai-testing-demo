@@ -2,10 +2,12 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
-const USAGE = 'Usage: npm run test:id -- HC-T123';
+import { validateAutomationTree } from './automation-mapping.mjs';
+
+const USAGE = 'Usage: npm run test:id -- HC-001';
 
 export function buildPlaywrightArgs(testId) {
-  if (typeof testId !== 'string' || !/^HC-T\d+$/.test(testId)) {
+  if (typeof testId !== 'string' || !/^HC-\d{3,}$/.test(testId)) {
     throw new Error(USAGE);
   }
 
@@ -16,6 +18,12 @@ export function buildPlaywrightArgs(testId) {
     `^${testId} \\|`,
     '--pass-with-no-tests',
   ];
+}
+
+export function assertTestIdExists(testId, discoveredIds) {
+  if (!discoveredIds.includes(testId)) {
+    throw new Error(`${testId} has no discovered automation`);
+  }
 }
 
 export function runById(testId) {
@@ -36,7 +44,11 @@ const isDirectRun = process.argv[1]
 
 if (isDirectRun) {
   try {
-    process.exitCode = runById(process.argv[2]);
+    const testId = process.argv[2];
+    buildPlaywrightArgs(testId);
+    const mapping = await validateAutomationTree('tests', 'testcases');
+    assertTestIdExists(testId, mapping.ids);
+    process.exitCode = runById(testId);
   } catch (error) {
     console.error(error instanceof Error ? error.message : error);
     process.exitCode = 1;

@@ -7,7 +7,7 @@
     "check:config": "node scripts/check-config.mjs",
     "check:skills": "node scripts/validate-skills.mjs",
     "check:mapping": "node scripts/validate-automation-mapping.mjs",
-    "test:unit": "node --test scripts/check-config.test.mjs scripts/automation-mapping.test.mjs scripts/summarize-results.test.mjs scripts/run-by-id.test.mjs && node --import tsx --test tests/config/environment.test.ts",
+    "test:unit": "node --test scripts/check-config.test.mjs scripts/automation-mapping.test.mjs scripts/summarize-results.test.mjs scripts/run-by-id.test.mjs scripts/publish-report-pages.test.mjs && node --import tsx --test tests/config/environment.test.ts",
     "typecheck": "tsc --noEmit",
     "test:list": "playwright test --list --pass-with-no-tests",
     "test": "playwright test",
@@ -18,6 +18,8 @@
     "test:id": "node scripts/run-by-id.mjs",
     "test:headed": "playwright test --headed",
     "report": "playwright show-report reports/playwright-report",
+    "report:publish": "node scripts/publish-report-pages.mjs",
+    "report:publish:dry": "node scripts/publish-report-pages.mjs --dry-run",
     "summarize": "node scripts/summarize-results.mjs",
     "verify": "npm run check:config && npm run check:skills && npm run check:mapping && npm run test:unit && npm run typecheck && npm run test:list"
   },
