@@ -1,0 +1,32 @@
+{
+  "project": "testing",
+  "target": "https://www.saucedemo.com/",
+  "total": 4,
+  "passed": 0,
+  "failed": 0,
+  "skipped": 4,
+  "failedTestIds": [],
+  "testcases": [
+    {
+      "testId": "HC-001",
+      "title": "Login successfully and start shopping",
+      "status": "skipped"
+    },
+    {
+      "testId": "HC-003",
+      "title": "Add only one unit of a product from the listing",
+      "status": "skipped"
+    },
+    {
+      "testId": "HC-004",
+      "title": "Remove one product from the listing",
+      "status": "skipped"
+    },
+    {
+      "testId": "HC-002",
+      "title": "Reject invalid credentials",
+      "status": "skipped"
+    }
+  ],
+  "generatedAt": "2026-08-21T02:41:27.440Z"
+}
