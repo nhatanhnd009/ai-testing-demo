@@ -1,12 +1,17 @@
 {
   "project": "testing",
   "target": "https://www.saucedemo.com/",
-  "total": 4,
-  "passed": 4,
+  "total": 8,
+  "passed": 8,
   "failed": 0,
   "skipped": 0,
   "failedTestIds": [],
   "testcases": [
+    {
+      "testId": "HC-006",
+      "title": "Complete checkout information and continue to payment step",
+      "status": "passed"
+    },
     {
       "testId": "HC-001",
       "title": "Login successfully and start shopping",
@@ -23,10 +28,25 @@
       "status": "passed"
     },
     {
+      "testId": "HC-008",
+      "title": "Cancel checkout returns to cart without removing product",
+      "status": "passed"
+    },
+    {
+      "testId": "HC-007",
+      "title": "Validate required checkout fields",
+      "status": "passed"
+    },
+    {
+      "testId": "HC-005",
+      "title": "Open checkout and verify product summary for cart contents",
+      "status": "passed"
+    },
+    {
       "testId": "HC-002",
       "title": "Reject invalid credentials",
       "status": "passed"
     }
   ],
-  "generatedAt": "2026-08-21T03:31:04.492Z"
+  "generatedAt": "2026-08-21T04:41:11.647Z"
 }
