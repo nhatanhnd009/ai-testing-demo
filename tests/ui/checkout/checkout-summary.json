@@ -1,0 +1,58 @@
+{
+  "HC-005": {
+    "credentialProfile": "standardUser",
+    "expectedCheckoutTitle": "Checkout: Your Information",
+    "expectedOverviewTitle": "Checkout: Overview",
+    "customer": {
+      "firstName": "QA",
+      "lastName": "User",
+      "zipCode": "12345"
+    },
+    "scenarios": [
+      {
+        "stepLabel": "Verify checkout summary with no products",
+        "products": [],
+        "expectedItemCount": 0,
+        "expectedSubtotal": "Item total: $0",
+        "expectedTax": "Tax: $0.00",
+        "expectedTotal": "Total: $0.00"
+      },
+      {
+        "stepLabel": "Verify checkout summary with one product",
+        "products": [
+          {
+            "name": "Sauce Labs Backpack",
+            "description": "carry.allTheThings() with the sleek, streamlined Sly Pack that melds uncompromising style with unequaled laptop and tablet protection.",
+            "price": "$29.99",
+            "addButtonName": "Add to cart"
+          }
+        ],
+        "expectedItemCount": 1,
+        "expectedSubtotal": "Item total: $29.99",
+        "expectedTax": "Tax: $2.40",
+        "expectedTotal": "Total: $32.39"
+      },
+      {
+        "stepLabel": "Verify checkout summary with two products",
+        "products": [
+          {
+            "name": "Sauce Labs Backpack",
+            "description": "carry.allTheThings() with the sleek, streamlined Sly Pack that melds uncompromising style with unequaled laptop and tablet protection.",
+            "price": "$29.99",
+            "addButtonName": "Add to cart"
+          },
+          {
+            "name": "Sauce Labs Bike Light",
+            "description": "A red light isn't the desired state in testing but it sure helps when riding your bike at night. Water-resistant with 3 lighting modes, 1 AAA battery included.",
+            "price": "$9.99",
+            "addButtonName": "Add to cart"
+          }
+        ],
+        "expectedItemCount": 2,
+        "expectedSubtotal": "Item total: $39.98",
+        "expectedTax": "Tax: $3.20",
+        "expectedTotal": "Total: $43.18"
+      }
+    ]
+  }
+}

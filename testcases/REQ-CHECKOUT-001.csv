@@ -1,0 +1,21 @@
+TestcaseID,Description,Preconditions,Steps,Expected
+HC-005,Open checkout and verify product summary for cart contents,"Application is available; valid credential profile exists; user can open the cart","1. Prepare cart with 0 products, 1 product, and 2 products
+2. Open the cart
+3. Click Checkout
+4. Verify checkout product summary","1. Cart contains the expected number of products
+2. Cart page is displayed
+3. Checkout page is displayed
+4. For 0 products, no product is shown and total money is 0; for 1 product, full information of the added product is displayed; for 2 products, full information of both added products is displayed"
+HC-006,Complete checkout information and continue to payment step,"Application is available; valid credential profile exists; user is on the Checkout page","1. Fill First Name
+2. Fill Last Name
+3. Fill Zip Code
+4. Click Continue","1. First Name contains the entered value
+2. Last Name contains the entered value
+3. Zip Code contains the entered value
+4. Payment step is displayed"
+HC-007,Validate required checkout fields,"Application is available; valid credential profile exists; user is on the Checkout page","1. Leave one required field empty and fill the others
+2. Click Continue","1. Checkout form has one missing required field
+2. Red error message is displayed as Error: $field name is required and payment step is not displayed"
+HC-008,Cancel checkout returns to cart without removing product,"Application is available; valid credential profile exists; at least one product is in the cart; user is on the Checkout page","1. Click Cancel
+2. Inspect the cart item","1. Cart page is displayed
+2. Previously added product remains in the cart"

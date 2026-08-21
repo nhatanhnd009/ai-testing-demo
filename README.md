@@ -36,9 +36,17 @@ testing/
 │   └── analyzed/
 ├── tests/
 │   ├── api/<feature>/
+│   │   ├── <case-name>.spec.ts
+│   │   └── <case-name>.json
 │   ├── ui/<feature>/
+│   │   ├── <case-name>.spec.ts
+│   │   └── <case-name>.json
 │   ├── integration/<feature>/
+│   │   ├── <case-name>.spec.ts
+│   │   └── <case-name>.json
 │   ├── end-to-end/<release-flow>/
+│   │   ├── <flow-name>.spec.ts
+│   │   └── <flow-name>.json
 │   ├── pages/
 │   ├── api-clients/
 │   ├── fixtures/

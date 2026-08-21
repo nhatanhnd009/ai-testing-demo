@@ -1,0 +1,9 @@
+{
+  "HC-008": {
+    "credentialProfile": "standardUser",
+    "expectedCheckoutTitle": "Checkout: Your Information",
+    "expectedCartTitle": "Your Cart",
+    "productName": "Sauce Labs Backpack",
+    "addButtonName": "Add to cart"
+  }
+}

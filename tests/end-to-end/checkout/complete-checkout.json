@@ -1,0 +1,14 @@
+{
+  "HC-006": {
+    "credentialProfile": "standardUser",
+    "expectedCheckoutTitle": "Checkout: Your Information",
+    "expectedOverviewTitle": "Checkout: Overview",
+    "productName": "Sauce Labs Backpack",
+    "addButtonName": "Add to cart",
+    "customer": {
+      "firstName": "QA",
+      "lastName": "User",
+      "zipCode": "12345"
+    }
+  }
+}
